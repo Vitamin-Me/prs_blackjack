@@ -1,3 +1,23 @@
-<div class="flex items-center justify-around m-6 p-6 border w-35 h-60 rounded-xl">
-    <p> test </p>
+<div class="relative m-6 flex h-60 w-40 shrink-0 items-center justify-center rounded-xl border">
+
+  <span class="absolute top-2 left-2">
+    <%= card.rank %>
+  </span>
+
+  <span class="absolute top-2 right-2">
+    <%= card.rank %>
+  </span>
+
+  <span class="absolute bottom-2 left-2">
+    <%= card.rank %>
+  </span>
+
+  <span class="absolute bottom-2 right-2">
+    <%= card.rank %>
+  </span>
+
+  <span>
+    <%= card.suit %>
+  </span>
+
 </div>

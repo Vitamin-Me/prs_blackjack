@@ -20,4 +20,5 @@ class Deck
     def deal(num_cards)
         @cards.pop(num_cards)
     end
+    
 end

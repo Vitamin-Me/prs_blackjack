@@ -7,11 +7,52 @@
       </code>
     </p>
 
-    <div class="flex">
-        <%= render partial: "card" %>
+  <div class="grid grid-cols-3 w-full font-display">
+    <div class="flex col-start-2 justify-center gap-4">
+      <% @dealer_cards.each do |card| %>
+        <%= render "card", card: card %>
+      <% end %>
+    </div>
+
+    
+    <div class="grid col-start-3 border justify-right pr-6 text-4xl">
+      <div>
+        Cards left in deck: <%= @cards_remaining %>
+      </div>
+        Test
+      </div>
+  </div>
+
+    <div class="text-4xl">
+        <%= @dealer_score %>
     </div>
 
     <%# Separates the dealer from the player #%>
     <hr class="my-6 border-black-300 w-full" />
+
+    <div class="text-4xl">
+        <%= @player_score %>
+    </div>
+
+    <div class="grid grid-cols-3 w-full font-display">
+      <div class="flex col-start-2 justify-center gap-4">
+        <% @player_cards.each do |card| %>
+          <%= render "card", card: card %>
+        <% end %>
+      </div>
+
+      <div class="col-start-3 flex flex-col gap-2 justify-self-center self-center">
+        <button type="button" class="h-10 w-20 border">
+          Stand
+        </button>
+
+        <%= button_to "Hit", "pages/hit", method: :post %>
+      
+      </div>
+      
+    </div>
+
+</main>
+    
 </div>
 
