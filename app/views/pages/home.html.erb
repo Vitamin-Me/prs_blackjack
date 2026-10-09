@@ -1,56 +1,54 @@
 <div class="flex flex-col items-center justify-center py-2">
   <main class="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
-    <p class="mt-3 text-2xl">
-        <p> Dealer</p>
-      <code class="p-3 font-mono text-lg bg-gray-100 rounded-md xl top">
-        t(O-O)t
-      </code>
-    </p>
-
-  <div class="grid grid-cols-3 w-full">
-    <div class="flex col-start-2 justify-center gap-4">
-      <% @dealer_cards.each do |card| %>
-        <%= render "card", card: card %>
+    <div class="grid grid-cols-3 w-full">
+    <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-20">
+      <% @dealer_cards.each_with_index do |card, index| %>
+          <% if index == 1 and not @dealer_revealed %>
+            <%= render "card_back" %>
+          <% else %>
+            <%= render "card", card: card %>
+          <% end %>
       <% end %>
     </div>
 
-    <div class="grid col-start-3 border self-justify-right px-6 text-4xl font-texturina">
-      <div>
-        Cards left in deck: <%= @cards_remaining %>
+    <div class="flex col-start-3 bg-gray-500 border rounded-xl self-justify-right px-6 text-2xl items-end font-texturina">
+      <div class="flex flex-col gap-4 items-start text-white py-4 max-h-64 overflow-y-auto">
+        <% @game_messages.each do |line| %>
+          <div> > <%= line %> </div> 
+        <% end %>
       </div>
-        Test
-      </div>
-  </div>
+    </div>
 
-    <div class="text-4xl font-texturina">
+    <div class="col-start-2 text-5xl font-texturina">
         <%= @dealer_score %>
     </div>
 
     <%# Separates the dealer from the player #%>
-    <hr class="my-6 border-black-300 w-full" />
+    <hr class="my-6 col-span-3 border-black-300 w-full" />
 
-    <div class="text-4xl font-texturina">
+    <div class="col-start-2 text-5xl font-texturina">
         <%= @player_score %>
     </div>
 
-    <div class="grid grid-cols-3 w-full">
-      <div class="flex col-start-2 justify-center gap-4">
+    <div class="flex col-start-3 items-start gap-4 px-6 mt-0">
+          <%= button_to "Stand", pages_stand_path, method: :post, disabled: @dealer_revealed || @player_score > 21, 
+          class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
+
+          <%= button_to "Hit", pages_hit_path, method: :post, disabled: @player_score >= 21 || @dealer_revealed, 
+          class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
+
+          <%= button_to "Split", pages_hit_path, method: :post, disabled: true, 
+          class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
+    </div>
+
+    <div class="flex col-start-2 justify-center gap-4">
         <% @player_cards.each do |card| %>
           <%= render "card", card: card %>
         <% end %>
       </div>
 
-      <div class="col-start-3 flex flex-col gap-2 justify-self-center self-center">
-        <button type="button" class="h-10 w-20 border">
-          Stand
-        </button>
 
-        <div class="bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black">
-          <%= button_to "Hit", pages_hit_path, method: :post %>
-        </div>
-      </div>
-      
-    </div>
+  </div>
 
 </main>
     

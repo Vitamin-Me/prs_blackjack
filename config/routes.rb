@@ -9,6 +9,7 @@ get 'pages/home', to: "pages#home", as: :pages_home
 
 post 'pages/start_game', to: "pages#start_game", as: :pages_start_game
 post 'pages/hit', to: "pages#hit", as: :pages_hit
+post 'pages/stand', to: "pages#stand", as: :pages_stand
 
 # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

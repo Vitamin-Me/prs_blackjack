@@ -26,4 +26,13 @@ class Hand
 
         scored
     end
+
+    def bust?
+        sum > 21
+    end
+
+    def blackjack?
+        cards.length == 2 && sum == 21
+    end
+
 end
