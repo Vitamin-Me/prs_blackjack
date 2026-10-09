@@ -1,9 +1,11 @@
 class Game
- def initialize(player_hand:, dealer_hand:)
+ def initialize(player_hand:, dealer_hand:, dealer_balance:, player_balance:, player_bet:)
   @player_hand = player_hand
   @dealer_hand = dealer_hand
- end
 
+  @dealer_balance = dealer_balance
+  @player_balance = player_balance - player_bet
+ end
 
   def result()
     return :player_bust if @player_hand.bust?

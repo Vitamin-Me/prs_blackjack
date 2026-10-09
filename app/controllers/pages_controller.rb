@@ -2,6 +2,11 @@ class PagesController < ApplicationController
   def home
     return redirect_to root_path if session[:player_cards].blank?
 
+    @player_bet = session[:player_bet]
+
+    @dealer_balance = session[:dealer_balance]
+    @player_balance = session[:player_balance]
+
     @game_messages = session[:game_messages] || []
 
     @dealer_revealed = session[:dealer_revealed]
@@ -25,12 +30,24 @@ class PagesController < ApplicationController
     deck = Deck.new
     deck.shuffle
 
+    session[:player_balance] = params[:player_balance].to_i
+    session[:dealer_balance] = params[:dealer_balance].to_i
+
     session[:game_messages] = ["Game has started!"]
 
     session[:dealer_revealed] = false
     session[:dealer_cards] = card_data(deck.deal(2))
     session[:player_cards] = card_data(deck.deal(2))
     session[:deck_cards]   = card_data(deck.cards)
+
+    redirect_to pages_home_path
+  end
+
+  def start_round
+
+    session[:player_bet] = params[:player_bet].to_i
+
+    session[:player_balance] = session[:player_balance] - session[:player_bet]
 
     redirect_to pages_home_path
   end
@@ -76,14 +93,15 @@ class PagesController < ApplicationController
     session[:dealer_cards] = card_data(dealer_cards)
     session[:deck_cards] = card_data(deck.cards)
 
-    result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards)).result
+    result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards), 
+    player_balance: session[:player_balance], dealer_balance: session[:dealer_balance], player_bet: session[:player_bet]).result
 
     case result
-    when :player_bust then message << "BUST! Dealer Wins!"
-    when :dealer_bust then message << "Dealer BUST! You Win!"
-    when :player_wins then message << "You Win!"
-    when :dealer_wins then message << "Dealer Wins :("
-    when :tie then message << "Same Score, Tie!"
+      when :player_bust then message << "BUST! Dealer wins!"
+      when :dealer_bust then message << "Dealer BUST! You win!"
+      when :player_wins then message << "You win!"
+      when :dealer_wins then message << "Dealer wins :("
+      when :tie then message << "Same score, tie!"
     end
 
     session[:game_messages] = message

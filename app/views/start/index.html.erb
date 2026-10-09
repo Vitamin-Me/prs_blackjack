@@ -1,3 +1,11 @@
-<div class="flex self-justify-center">
-  <%= button_to "Start Game", pages_start_game_path, method: :post %>
+<div class="flex-1 flex flex-col justify-center items-center">
+  <%= form_with url: pages_start_game_path do |f| %>
+    <%= f.label :player_balance, "Player Balance" %>
+    <%= f.number_field :player_balance %>
+
+    <%= f.label :dealer_balance, "Dealer Balance" %>
+    <%= f.number_field :dealer_balance %>
+
+    <%= f.submit "Start Game" %>
+  <% end %>
 </div>

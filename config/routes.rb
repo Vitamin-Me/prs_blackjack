@@ -8,6 +8,7 @@ root "start#index"
 get 'pages/home', to: "pages#home", as: :pages_home
 
 post 'pages/start_game', to: "pages#start_game", as: :pages_start_game
+post 'pages/start_round', to: "pages#start_round", as: :pages_start_round
 post 'pages/hit', to: "pages#hit", as: :pages_hit
 post 'pages/stand', to: "pages#stand", as: :pages_stand
 
