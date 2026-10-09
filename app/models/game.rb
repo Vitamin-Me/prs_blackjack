@@ -6,7 +6,7 @@ class Game
  end
 
 
-  def add_card(num, deck)
+  def add_card(num)
     @person = deck.deal(num)
   end
 end

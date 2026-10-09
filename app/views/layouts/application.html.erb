@@ -21,15 +21,16 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=New+Rocker&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=New+Rocker&family=Nova+Round&family=Texturina:ital,opsz,wght@0,12..72,100..900;1,12..72,100..900&display=swap" rel="stylesheet">
   </head>
 
   <body class="bg-gray-300">
 
     <nav class="grid grid-cols-3 w-full items-center">
-    <h1 class="col-start-1 justify-self-beginning font-display pl-6 text-4xl"> $5450<%= @player_money %> </h1>
+    <h1 class="col-start-1 justify-self-beginning font-texturina pl-6 text-4xl"> $5450<%= @player_money %> </h1>
       <h1 class="col-start-2 justify-self-center font-display p-6 text-6xl">
         BlackJack
         </h1>

@@ -7,15 +7,14 @@
       </code>
     </p>
 
-  <div class="grid grid-cols-3 w-full font-display">
+  <div class="grid grid-cols-3 w-full">
     <div class="flex col-start-2 justify-center gap-4">
       <% @dealer_cards.each do |card| %>
         <%= render "card", card: card %>
       <% end %>
     </div>
 
-    
-    <div class="grid col-start-3 border justify-right pr-6 text-4xl">
+    <div class="grid col-start-3 border self-justify-right px-6 text-4xl font-texturina">
       <div>
         Cards left in deck: <%= @cards_remaining %>
       </div>
@@ -23,18 +22,18 @@
       </div>
   </div>
 
-    <div class="text-4xl">
+    <div class="text-4xl font-texturina">
         <%= @dealer_score %>
     </div>
 
     <%# Separates the dealer from the player #%>
     <hr class="my-6 border-black-300 w-full" />
 
-    <div class="text-4xl">
+    <div class="text-4xl font-texturina">
         <%= @player_score %>
     </div>
 
-    <div class="grid grid-cols-3 w-full font-display">
+    <div class="grid grid-cols-3 w-full">
       <div class="flex col-start-2 justify-center gap-4">
         <% @player_cards.each do |card| %>
           <%= render "card", card: card %>
@@ -46,8 +45,9 @@
           Stand
         </button>
 
-        <%= button_to "Hit", "pages/hit", method: :post %>
-      
+        <div class="bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black">
+          <%= button_to "Hit", pages_hit_path, method: :post %>
+        </div>
       </div>
       
     </div>
