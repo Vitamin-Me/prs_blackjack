@@ -7,7 +7,7 @@ class Game
   @player_balance = player_balance - player_bet
  end
 
-  def result()
+  def result
     return :player_bust if @player_hand.bust?
     return :dealer_bust if @dealer_hand.bust?
 
@@ -16,4 +16,6 @@ class Game
 
     :tie
   end
+
+
 end

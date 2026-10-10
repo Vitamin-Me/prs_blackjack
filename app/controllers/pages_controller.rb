@@ -2,7 +2,7 @@ class PagesController < ApplicationController
   def home
     return redirect_to root_path if session[:player_cards].blank?
 
-    @player_bet = session[:player_bet]
+    @player_bet = session[:player_bet] || 0
 
     @dealer_balance = session[:dealer_balance]
     @player_balance = session[:player_balance]
@@ -24,6 +24,12 @@ class PagesController < ApplicationController
 
     @cards_remaining = session[:deck_cards].length
 
+  end
+
+  def setup_game
+    reset_session
+
+    redirect_to root_path
   end
 
   def start_game
@@ -96,9 +102,17 @@ class PagesController < ApplicationController
     result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards), 
     player_balance: session[:player_balance], dealer_balance: session[:dealer_balance], player_bet: session[:player_bet]).result
 
+    if result == :player_bust
+        session[:player_balance] = session[:player_balance] - session[:player_bet]
+        message << "BUST! Dealer wins!"
+    end
+
     case result
-      when :player_bust then message << "BUST! Dealer wins!"
-      when :dealer_bust then message << "Dealer BUST! You win!"
+      when :player_bust then message << "BUST! Dealer wins!"  
+      when :dealer_bust
+         then session[:player_balance] = session[:player_balance] + (session[:player_bet] * 2);
+          session[:dealer_balance] = session[:dealer_balance] - session[:player_bet];
+          message << "Dealer BUST! You win!"
       when :player_wins then message << "You win!"
       when :dealer_wins then message << "Dealer wins :("
       when :tie then message << "Same score, tie!"
