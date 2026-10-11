@@ -9,6 +9,7 @@ post 'pages/setup_game', to: "pages#setup_game", as: :setup_game
 
 post 'pages/start_game', to: "pages#start_game", as: :pages_start_game
 post 'pages/start_round', to: "pages#start_round", as: :pages_start_round
+post 'pages/reset_game', to: "pages#reset_game", as: :pages_reset_game
 post 'pages/hit', to: "pages#hit", as: :pages_hit
 post 'pages/stand', to: "pages#stand", as: :pages_stand
 

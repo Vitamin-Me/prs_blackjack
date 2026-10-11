@@ -2,6 +2,10 @@ class PagesController < ApplicationController
   def home
     return redirect_to root_path if session[:player_cards].blank?
 
+    @game_over = session[:game_over]
+
+    @round_start = session[:round_start]
+
     @player_bet = session[:player_bet] || 0
 
     @dealer_balance = session[:dealer_balance]
@@ -36,12 +40,38 @@ class PagesController < ApplicationController
     deck = Deck.new
     deck.shuffle
 
+    session[:game_start] = true
+
+    session[:round_start] = false
+
     session[:player_balance] = params[:player_balance].to_i
     session[:dealer_balance] = params[:dealer_balance].to_i
 
     session[:game_messages] = ["Game has started!"]
 
     session[:dealer_revealed] = false
+    
+    session[:dealer_cards] = card_data(deck.deal(2))
+    session[:player_cards] = card_data(deck.deal(2))
+    session[:deck_cards]   = card_data(deck.cards)
+
+    redirect_to pages_home_path
+  end
+
+  def reset_game
+    deck = Deck.new
+    deck.shuffle
+
+    session[:round_start] = false
+
+    session[:game_start] = true
+
+    session[:game_messages] = ["Game has started!"]
+
+    session[:dealer_revealed] = false
+
+    session[:player_bet] = params[:player_bet].to_i || 0
+    
     session[:dealer_cards] = card_data(deck.deal(2))
     session[:player_cards] = card_data(deck.deal(2))
     session[:deck_cards]   = card_data(deck.cards)
@@ -50,8 +80,21 @@ class PagesController < ApplicationController
   end
 
   def start_round
+    # session[:dealer_revealed] = true
 
-    session[:player_bet] = params[:player_bet].to_i
+    bet = params[:player_bet].to_i || 0
+    balance = session[:player_balance]
+
+    if bet > session[:player_balance]
+      message = session[:game_messages]
+      message << "Your bet exceeds your balance!"
+      return redirect_to pages_home_path
+    end
+    session[:round_start] = true
+
+    session[:game_start] = false
+
+    session[:player_bet] = bet
 
     session[:player_balance] = session[:player_balance] - session[:player_bet]
 
@@ -73,9 +116,15 @@ class PagesController < ApplicationController
 
     if Hand.new(cards: player_cards).bust?
       session[:dealer_revealed] = true
+      session[:round_start] = false
+      session[:game_start] = false
       message << "Bust! Dealer wins"
       session[:game_messages] = message
+
+      game_result
     end
+
+
 
     redirect_to pages_home_path
   end
@@ -102,27 +151,46 @@ class PagesController < ApplicationController
     result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards), 
     player_balance: session[:player_balance], dealer_balance: session[:dealer_balance], player_bet: session[:player_bet]).result
 
-    if result == :player_bust
-        session[:player_balance] = session[:player_balance] - session[:player_bet]
-        message << "BUST! Dealer wins!"
-    end
-
     case result
-      when :player_bust then message << "BUST! Dealer wins!"  
+      when :player_bust
+         then message << "BUST! Dealer wins!";
+         sesion[:dealer_balance] = session[:dealer_balance] + session[:player_bet];
+         session[:round_start] = false
+         session[:game_start] = false
+        
       when :dealer_bust
-         then session[:player_balance] = session[:player_balance] + (session[:player_bet] * 2);
+         then message << "Dealer BUST! You win!";
+          session[:player_balance] = session[:player_balance] + (session[:player_bet] * 2);
           session[:dealer_balance] = session[:dealer_balance] - session[:player_bet];
-          message << "Dealer BUST! You win!"
-      when :player_wins then message << "You win!"
-      when :dealer_wins then message << "Dealer wins :("
-      when :tie then message << "Same score, tie!"
+          session[:round_start] = false
+          session[:game_start] = false
+          
+      when :player_wins
+         then message << "You win!";
+          session[:player_balance] = session[:player_balance] + (session[:player_bet] * 2);
+          session[:dealer_balance] = session[:dealer_balance] - session[:player_bet];
+          session[:round_start] = false
+          session[:game_start] = false
+
+      when :dealer_wins
+         then message << "Dealer wins :(";
+         session[:dealer_balance] = session[:dealer_balance] + session[:player_bet];
+         session[:round_start] = false
+         session[:game_start] = false
+
+      when :tie
+         then message << "Same score, tie!";
+         session[:player_balance] = session[:player_balance] + session[:player_bet];
+         session[:round_start] = false
+         session[:game_start] = false
     end
 
     session[:game_messages] = message
 
+    game_result
+
     redirect_to pages_home_path
   end
-
 
   private
 
@@ -132,5 +200,20 @@ class PagesController < ApplicationController
 
   def cards_from(card_data)
     card_data.map { |data| Card.new(rank: data["rank"], suit: data["suit"]) }
+  end
+
+  def game_result
+    message = session[:game_messages]
+    player_balance = session[:player_balance]
+    dealer_balance = session[:dealer_balance]
+
+    if player_balance <= 0
+      message << "You are out of money, it's game over!"
+      session[:game_over] = true
+    elsif dealer_balance <= 0
+      message << "Dealer is out of money, you win the game!"
+      session[:game_over] = true
+    end
+    
   end
 end
