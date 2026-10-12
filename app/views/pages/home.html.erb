@@ -3,7 +3,9 @@
     <div class="grid grid-cols-3 w-full">
       <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-20">
         <% @dealer_cards.each_with_index do |card, index| %>
-            <% if index == 1 and @game_stage == 1%>
+            <% if @game_stage == 1%>
+              <%= render "card_back" %>
+            <% elsif index == 1 and not @dealer_revealed %>
               <%= render "card_back" %>
             <% else %>
               <%= render "card", card: card %>
@@ -11,8 +13,8 @@
         <% end %>
       </div>
 
-      <div class="flex col-start-3 bg-gray-500 rounded-xl px-6 text-2xl items-end font-texturina">
-        <div class="flex flex-col gap-4 items-start text-white py-4 max-h-64 overflow-y-auto">
+      <div class="flex col-start-3 bg-gray-500 rounded-xl px-6 text-2xl items-center font-texturina">
+        <div class="flex flex-col gap-4 items-start text-white max-h-64 w-full overflow-y-auto">
           <% @game_messages.each do |line| %>
             <div> > <%= line %> </div> 
           <% end %>
@@ -68,8 +70,8 @@
               disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
 
           <% end %>
-            <div class="flex flex-col col-start-1 items-center gap-10">
-              <%= button_to "New Round", pages_reset_game_path, disabled: @game_stage != 3, class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
+            <div class="col-start-1 items-center">
+              <%= button_to "New Round", pages_reset_game_path, disabled: @game_stage != 3, class: "w-40 bg-black text-white px-2 py-2 rounded-md hover:bg-white hover:text-black
                 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
             </div>   
           

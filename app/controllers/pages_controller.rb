@@ -1,9 +1,17 @@
 class PagesController < ApplicationController
+  def setup
+      reset_session
+
+      session[:game_stage] = 0  
+  end
+
   def home
     return redirect_to root_path if session[:player_cards].blank?
 
-     # primary game state to control button interactibility in the view
-    @game_stage = session[:game_stage]
+    @win_ratio = session[:win_ratio]
+
+    # primary game state to control button interactibility in the view
+    @game_stage = session[:game_stage] || 0
 
     @player_bet = session[:player_bet] || 0
 
@@ -27,12 +35,6 @@ class PagesController < ApplicationController
 
     @cards_remaining = session[:deck_cards].length
 
-  end
-
-  def setup_game
-    reset_session
-
-    redirect_to root_path
   end
 
   # New game has been created, player should only be able to place a bet and see no cards
@@ -60,6 +62,7 @@ class PagesController < ApplicationController
     session[:player_balance] = params[:player_balance].to_i
     session[:dealer_balance] = params[:dealer_balance].to_i
 
+    session[:win_ratio] = params[:win_ratio].to_i || 1
     
     session[:dealer_cards] = card_data(deck.deal(2))
     session[:player_cards] = card_data(deck.deal(2))
@@ -176,40 +179,49 @@ class PagesController < ApplicationController
 
     dealer_cards = cards_from(session[:dealer_cards])
     player_cards = cards_from(session[:player_cards])
+
+    player_balance = session[:player_balance]
+    dealer_balance = session[:dealer_balance]
+
+    player_bet = session[:player_bet]
+
+    win_ratio = session[:win_ratio]
       
     result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards), 
-    player_balance: session[:player_balance], dealer_balance: session[:dealer_balance])
+    player_balance: player_balance, dealer_balance: dealer_balance)
+
+
 
     case result.hand
       when :player_bust
         then message << "BUST! Dealer wins this hand!";
-        session[:dealer_balance] = session[:dealer_balance] + session[:player_bet];
+        session[:dealer_balance] += player_bet;
         session[:game_stage] = 3
   
       when :dealer_bust
         then message << "Dealer BUST! You win this hand!";
-        session[:player_balance] = session[:player_balance] + (session[:player_bet] * 2);
-        session[:dealer_balance] = session[:dealer_balance] - session[:player_bet];
+        session[:player_balance] += (player_bet + (player_bet * win_ratio));
+        session[:dealer_balance] -= player_bet;
         session[:game_stage] = 3
         
       when :player_wins_round
         then message << "You win this hand!";
-        session[:player_balance] = session[:player_balance] + (session[:player_bet] * 2);
-        session[:dealer_balance] = session[:dealer_balance] - session[:player_bet];
+        session[:player_balance] += (player_bet + (player_bet * win_ratio));
+        session[:dealer_balance] -= player_bet;
         session[:game_stage] = 3
 
       when :dealer_wins_round
         then message << "Dealer wins this hand :(";
-        session[:dealer_balance] = session[:dealer_balance] + session[:player_bet];
+        session[:dealer_balance] += player_bet;
         session[:game_stage] = 3
 
       when :tie
          then message << "Same score, tie!";
-         session[:player_balance] = session[:player_balance] + session[:player_bet];
+         session[:player_balance] += player_bet;
          session[:game_stage] = 3
     end
 
-    case result.game(player_balance: session[:player_balance], dealer_balance: session[:dealer_balance])
+    case result.game(player_balance: player_balance, dealer_balance: dealer_balance)
       when :player_wins
         message << "Dealer has no money left, you win!";
         session[:game_stage] = 4

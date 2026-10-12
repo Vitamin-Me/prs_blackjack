@@ -2,17 +2,22 @@
   <%= form_with url: pages_start_game_path, class: "flex flex-col items-center text-center" do |f| %>
   <div class="flex flex-col m-5">
       <%= f.label :player_balance, "Player Balance", class: "text-2xl pb-2" %>
-      <%= f.number_field :player_balance, required: true, class: "bg-white w-40 text-center rounded-md p-2 text-2xl" %>
+      <%= f.number_field :player_balance, required: true, class: "bg-white w-40 text-center rounded-md p-2 text-2xl", placeholder: "$0" %>
   </div>
 
-  <div class="flex flex-col m-5 pb-10">
+  <div class="flex flex-col m-5 pb-5">
       <%= f.label :dealer_balance, "Dealer Balance", class: "text-2xl pb-2" %>
-      <%= f.number_field :dealer_balance, required: true, class: "bg-white w-40 text-center rounded-md p-2 text-2xl" %>
+      <%= f.number_field :dealer_balance, required: true, class: "bg-white w-40 text-center rounded-md p-2 text-2xl", placeholder: "$0" %>
   </div>
 
-    <%= f.submit "Start Game", class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black"%>
-  <% end %>
+  <div class="flex flex-col pb-10">
+    <%= f.label :win_ratio, "Win ratio", class: "text-2xl pb-2" %>
+    <%= f.select :win_ratio, [['1:1', 1], ['2:1', 2], ['4:1', 4]], {}, {class: "bg-white w-40 text-center rounded-md p-2 text-2xl"} %>
+  </div>
 
+  <%= f.submit "Start Game", class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black"%>
+  <% end %>
+  
   <div class="flex flex-col pt-20 text-1xl">
     Goal: Beat the game by winning enough hands to deplete the dealers entire balance.
   </div>

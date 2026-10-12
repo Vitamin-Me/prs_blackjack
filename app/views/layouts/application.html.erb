@@ -37,7 +37,7 @@
         BlackJack
         </h1>
       <div class="flex flex-col col-start-3 items-end font-texturina">
-        <%= button_to "New Game", setup_game_path, method: :post, class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
+        <%= button_to "New Game", setup_game_path, hidden: !@game_stage == 0, method: :get, class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
          disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
       </div>
     </nav>
