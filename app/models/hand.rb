@@ -8,16 +8,16 @@ class Hand
     def sum
         scored = @cards.sum do |card|
             case card.rank
-            when 'A'
+            when "A"
                 11
-            when 'K', 'Q', 'J'
+            when "K", "Q", "J"
                 10
             else
                 card.rank.to_i
             end
         end
 
-        aces = @cards.count { |card| card.rank == 'A' }
+        aces = @cards.count { |card| card.rank == "A" }
 
         while scored > 21 && aces > 0
             scored -= 10
@@ -34,5 +34,4 @@ class Hand
     def blackjack?
         cards.length == 2 && sum == 21
     end
-
 end

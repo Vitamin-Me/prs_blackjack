@@ -3,7 +3,7 @@ class PagesController < ApplicationController
   def setup
       reset_session
 
-      session[:game_stage] = 0  
+      session[:game_stage] = 0
   end
 
   # New game has been created, player should only be able to place a bet and see no cards
@@ -17,20 +17,20 @@ class PagesController < ApplicationController
       session[:player_balance] = params[:player_balance].to_i
       session[:dealer_balance] = params[:dealer_balance].to_i
     end
- 
+
     if session[:game_stage] == 0
       session[:win_ratio] = params[:win_ratio].to_i
     end
-    
+
     session[:game_stage] = 1
-    
+
     session[:dealer_revealed] = false
 
     session[:dealer_cards] = card_data(deck.deal(2))
     session[:player_cards] = card_data(deck.deal(2))
     session[:deck_cards]   = card_data(deck.cards)
 
-    session[:game_messages] = ["Game has started!"]
+    session[:game_messages] = [ "Game has started!" ]
 
     redirect_to pages_home_path
   end
@@ -61,17 +61,15 @@ class PagesController < ApplicationController
     if @dealer_revealed
       @dealer_score = Hand.new(cards: @dealer_cards).sum
     else
-      @dealer_score = Hand.new(cards: [@dealer_cards.first]).sum
+      @dealer_score = Hand.new(cards: [ @dealer_cards.first ]).sum
     end
 
     @player_score = Hand.new(cards: @player_cards).sum
 
     @cards_remaining = session[:deck_cards].length
-
   end
 
   def start_round
-
     # this is the beginning of stage two, revealing one dealer card and both players, while enabling player actions
     #   and disabling betting and new round
 
@@ -89,13 +87,13 @@ class PagesController < ApplicationController
     # valid bet, subtract from balance right away
     session[:player_bet] = bet
     session[:player_balance] -= bet
-  
+
     # advance the gameplay
     session[:game_stage] = 2
 
-    # check for blackjack 
+    # check for blackjack
     check_results(blackjack_check: true)
-  
+
     redirect_to pages_home_path
   end
 
@@ -104,7 +102,7 @@ class PagesController < ApplicationController
     deck = Deck.new(cards: cards_from(session[:deck_cards]))
     player_cards = cards_from(session[:player_cards])
     dealer_cards = cards_from(session[:dealer_cards])
-    player_cards << deck.deal(1).first  
+    player_cards << deck.deal(1).first
 
     session[:player_cards] = card_data(player_cards)
     session[:deck_cards] = card_data(deck.cards)
@@ -125,7 +123,7 @@ class PagesController < ApplicationController
     deck = Deck.new(cards: cards_from(session[:deck_cards]))
     dealer_cards = cards_from(session[:dealer_cards])
     player_cards = cards_from(session[:player_cards])
-    
+
     session[:dealer_revealed] = true
 
     message = session[:game_messages] || []
@@ -164,55 +162,54 @@ class PagesController < ApplicationController
     player_bet = session[:player_bet]
 
     win_ratio = session[:win_ratio]
-      
-    result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards), 
+
+    result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards),
     player_balance: session[:player_balance], dealer_balance: session[:dealer_balance], blackjack_check: blackjack_check)
 
     case result.hand
-      when :player_bust
-        then message << "BUST! Dealer wins this hand!";
-        session[:dealer_balance] += player_bet;
-        session[:game_stage] = 3
-  
-      when :dealer_bust
-        then message << "Dealer BUST! You win this hand!";
-        session[:player_balance] += (player_bet + (player_bet * win_ratio));
-        session[:dealer_balance] -= player_bet;
-        session[:game_stage] = 3
-        
-      when :player_wins_round
-        then message << "You win this hand!";
-        session[:player_balance] += (player_bet + (player_bet * win_ratio));
-        session[:dealer_balance] -= player_bet;
+    when :player_bust
+        then message << "BUST! Dealer wins this hand!"
+        session[:dealer_balance] += player_bet
         session[:game_stage] = 3
 
-      when :dealer_wins_round
-        then message << "Dealer wins this hand :(";
-        session[:dealer_balance] += player_bet;
+    when :dealer_bust
+        then message << "Dealer BUST! You win this hand!"
+        session[:player_balance] += (player_bet + (player_bet * win_ratio))
+        session[:dealer_balance] -= player_bet
         session[:game_stage] = 3
 
-      when :blackjack
+    when :player_wins_round
+        then message << "You win this hand!"
+        session[:player_balance] += (player_bet + (player_bet * win_ratio))
+        session[:dealer_balance] -= player_bet
+        session[:game_stage] = 3
+
+    when :dealer_wins_round
+        then message << "Dealer wins this hand :("
+        session[:dealer_balance] += player_bet
+        session[:game_stage] = 3
+
+    when :blackjack
         then message << "You hit BLACKJACK, you win!"
-        session[:player_balance] += (player_bet + (player_bet * win_ratio));
-        session[:dealer_balance] -= player_bet;
+        session[:player_balance] += (player_bet + (player_bet * win_ratio))
+        session[:dealer_balance] -= player_bet
         session[:game_stage] = 3
 
-      when :tie
-         then message << "Same score, tie!";
-         session[:player_balance] += player_bet;
+    when :tie
+         then message << "Same score, tie!"
+         session[:player_balance] += player_bet
          session[:game_stage] = 3
     end
 
     case result.game(player_balance: session[:player_balance], dealer_balance: session[:dealer_balance])
-      when :player_wins
-        message << "Dealer has no money left, you win!";
+    when :player_wins
+        message << "Dealer has no money left, you win!"
         session[:game_stage] = 4
-      when :dealer_wins
-        message << "Player has no money left, Dealer wins!";
+    when :dealer_wins
+        message << "Player has no money left, Dealer wins!"
         session[:game_stage] = 4
     end
 
     session[:game_messages] = message
-
   end
 end

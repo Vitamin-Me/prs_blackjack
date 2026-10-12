@@ -11,7 +11,7 @@ class Game
 
   def hand
     if @blackjack_check
-      return :blackjack if @player_hand.blackjack?
+      :blackjack if @player_hand.blackjack?
 
     else
       return :player_bust if @player_hand.bust?
@@ -29,8 +29,7 @@ class Game
       return :player_wins if dealer_balance <= 0
       return :dealer_wins if player_balance <= 0
     end
-    
+
     nil
   end
-
 end

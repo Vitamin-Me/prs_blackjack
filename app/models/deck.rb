@@ -7,8 +7,8 @@ class Deck
         else
             @cards = []
 
-            suits = ['Hearts', 'Diamonds', 'Clubs', 'Spades']
-            ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+            suits = [ "Hearts", "Diamonds", "Clubs", "Spades" ]
+            ranks = [ "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A" ]
 
             suits.each do |suit|
                 ranks.each do |rank|
@@ -16,7 +16,6 @@ class Deck
                 end
             end
         end
-        
     end
 
     def shuffle
@@ -26,5 +25,4 @@ class Deck
     def deal(num_cards)
         @cards.pop(num_cards)
     end
-    
 end
