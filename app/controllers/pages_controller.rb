@@ -1,66 +1,26 @@
 class PagesController < ApplicationController
+  # root page, for game setup
   def setup
       reset_session
 
       session[:game_stage] = 0  
   end
 
-  def home
-    return redirect_to root_path if session[:player_cards].blank?
-
-    @win_ratio = session[:win_ratio]
-
-    # primary game state to control button interactibility in the view
-    @game_stage = session[:game_stage] || 0
-
-    @player_bet = session[:player_bet] || 0
-
-    @dealer_balance = session[:dealer_balance]
-    @player_balance = session[:player_balance]
-
-    @game_messages = session[:game_messages] || []
-
-    @dealer_revealed = session[:dealer_revealed]
-
-    @dealer_cards = cards_from(session[:dealer_cards])
-    @player_cards = cards_from(session[:player_cards])
-
-    if @dealer_revealed
-      @dealer_score = Hand.new(cards: @dealer_cards).sum
-    else
-      @dealer_score = Hand.new(cards: [@dealer_cards.first]).sum
-    end
-
-    @player_score = Hand.new(cards: @player_cards).sum
-
-    @cards_remaining = session[:deck_cards].length
-
-  end
-
   # New game has been created, player should only be able to place a bet and see no cards
   def start_game
-    # New deck, resets each game
+    # New deck, resets each game AND round
     deck = Deck.new
     deck.shuffle
 
-    # I am chunking this into stages, because reading :game_start, :round_start, etc. is getting confusing
-    # stage one is a new round, no cards revealed yet, waiting for players bet
-
-    # stage two will be dealers one card is revealed and both players cards are revealed, enabling the player actions
-    #   and disabling the bet and new round actions
-
-    # stage three will be the round is over, bet and player actions are disabled with only new round enabled
-
-    # new round will then go back into stage one
+    # set balances from setup one time on game start, not on a new round
+    if session[:game_stage] == 0
+      session[:player_balance] = params[:player_balance].to_i
+      session[:dealer_balance] = params[:dealer_balance].to_i
+    end
 
     session[:game_stage] = 1
     
     session[:dealer_revealed] = false
-
-    # set the player and dealers balances from the setup page, default to 0
-    # these will persist through the game, do not get reset after a round
-    session[:player_balance] = params[:player_balance].to_i
-    session[:dealer_balance] = params[:dealer_balance].to_i
 
     session[:win_ratio] = params[:win_ratio].to_i || 1
     
@@ -74,23 +34,39 @@ class PagesController < ApplicationController
     redirect_to pages_home_path
   end
 
-  def reset_game
-    deck = Deck.new
-    deck.shuffle
+  # main page, hosts the games interaction
+  def home
+    return redirect_to root_path if session[:player_cards].blank?
 
-    session[:game_stage] = 1
+    @win_ratio = session[:win_ratio]
 
-    session[:game_messages] = ["Game has started!"]
+    # primary game state to control button interactibility in the view
+    # 5 stages, 0-4.
+    @game_stage = session[:game_stage] || 1
 
-    session[:dealer_revealed] = false
+    @player_bet = session[:player_bet] || 1
 
-    session[:player_bet] = params[:player_bet].to_i || 0
-    
-    session[:dealer_cards] = card_data(deck.deal(2))
-    session[:player_cards] = card_data(deck.deal(2))
-    session[:deck_cards]   = card_data(deck.cards)
+    @dealer_balance = session[:dealer_balance]
+    @player_balance = session[:player_balance]
 
-    redirect_to pages_home_path
+    @game_messages = session[:game_messages] || []
+
+    @dealer_revealed = session[:dealer_revealed]
+
+    @dealer_cards = cards_from(session[:dealer_cards])
+    @player_cards = cards_from(session[:player_cards])
+
+    # dealer has one hidden card, dont want to sum it hidden
+    if @dealer_revealed
+      @dealer_score = Hand.new(cards: @dealer_cards).sum
+    else
+      @dealer_score = Hand.new(cards: [@dealer_cards.first]).sum
+    end
+
+    @player_score = Hand.new(cards: @player_cards).sum
+
+    @cards_remaining = session[:deck_cards].length
+
   end
 
   def start_round
@@ -98,7 +74,8 @@ class PagesController < ApplicationController
     # this is the beginning of stage two, revealing one dealer card and both players, while enabling player actions
     #   and disabling betting and new round
     
-    bet = params[:player_bet].to_i || 0
+    # check for valid bet before advancing stage
+    bet = params[:player_bet].to_i
     balance = session[:player_balance]
 
     if bet > session[:player_balance]
@@ -107,19 +84,19 @@ class PagesController < ApplicationController
       return redirect_to pages_home_path
     end
 
-
-    session[:game_stage] = 2
-
-    session[:dealer_revealed] == true
-
+    # valid bet, subtract from balance right away
     session[:player_bet] = bet
+    session[:player_balance] -= bet
 
-    session[:player_balance] = session[:player_balance] - session[:player_bet]
+    # advance the gameplay
+    session[:game_stage] = 2
+    session[:dealer_revealed] == true
 
     redirect_to pages_home_path
   end
 
   def hit
+    # new deck object, same cards from session
     deck = Deck.new(cards: cards_from(session[:deck_cards]))
     player_cards = cards_from(session[:player_cards])
     dealer_cards = cards_from(session[:dealer_cards])
@@ -141,6 +118,7 @@ class PagesController < ApplicationController
   end
 
   def stand
+    # new deck object, same cards from session
     deck = Deck.new(cards: cards_from(session[:deck_cards]))
     dealer_cards = cards_from(session[:dealer_cards])
     player_cards = cards_from(session[:player_cards])

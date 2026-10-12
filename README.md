@@ -1,9 +1,9 @@
 # README
 Welcome to my game of BlackJack where you gamble your heart out until you have removed every dollar from the Dealer! (He's evil its okay)
 
-The goal is simple: set a balance for yourself (the Player) and the Dealer, and use YOUR balance to reduce the DEALERS balance down to ZERO or BELOW. 
+The goal is simple: set a balance for yourself (the Player) and the Dealer, set your win ratio, and use YOUR balance to reduce the DEALERS balance down to ZERO or BELOW. 
 
-The game uses one deck, randomly shuffled each session, and allows the player to place a BET, and HIT or STAND depending on their hand.
+The game uses one deck, renews and shuffles it each session, and allows the player to place a BET, and HIT or STAND depending on their hand.
 
 Everything runs in the browser session: state, deck, hand, balance, bets, logs, etc. This was not meant to be the long term solution, but protoyping with session variables turned out to be acceptable in the current product. 
 
@@ -11,27 +11,12 @@ Additional features would be adding SPLIT, INSURANCE, and additional actions tha
 
 The game is lightweight, it uses less than 4kb of data to live in the session, and is split into a few core classes and a primary controller. 
 
-There are only two pages, a setup page and the home page which acts as the game table.
+There are only two pages: a setup page and the home page, which acts as the game table.
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Here are the projects dependencies:
 
-Things you may want to cover:
+    Ruby version: 3.4.7
 
-* Ruby version
+    Rails version: 8.0.5.1, Bundler 2.6.9
 
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+To be continued...
