@@ -17,18 +17,19 @@ class PagesController < ApplicationController
       session[:player_balance] = params[:player_balance].to_i
       session[:dealer_balance] = params[:dealer_balance].to_i
     end
-
+ 
+    if session[:game_stage] == 0
+      session[:win_ratio] = params[:win_ratio].to_i
+    end
+    
     session[:game_stage] = 1
     
     session[:dealer_revealed] = false
 
-    session[:win_ratio] = params[:win_ratio].to_i || 1
-    
     session[:dealer_cards] = card_data(deck.deal(2))
     session[:player_cards] = card_data(deck.deal(2))
     session[:deck_cards]   = card_data(deck.cards)
 
-    
     session[:game_messages] = ["Game has started!"]
 
     redirect_to pages_home_path
@@ -73,13 +74,14 @@ class PagesController < ApplicationController
 
     # this is the beginning of stage two, revealing one dealer card and both players, while enabling player actions
     #   and disabling betting and new round
-    
+
+    message = session[:game_messages]
+
     # check for valid bet before advancing stage
     bet = params[:player_bet].to_i
     balance = session[:player_balance]
 
     if bet > session[:player_balance]
-      message = session[:game_messages]
       message << "Your bet exceeds your balance!"
       return redirect_to pages_home_path
     end
@@ -87,11 +89,13 @@ class PagesController < ApplicationController
     # valid bet, subtract from balance right away
     session[:player_bet] = bet
     session[:player_balance] -= bet
-
+  
     # advance the gameplay
     session[:game_stage] = 2
-    session[:dealer_revealed] == true
 
+    # check for blackjack 
+    check_results(blackjack_check: true)
+  
     redirect_to pages_home_path
   end
 
@@ -105,13 +109,12 @@ class PagesController < ApplicationController
     session[:player_cards] = card_data(player_cards)
     session[:deck_cards] = card_data(deck.cards)
 
-
     message = session[:game_messages] || []
     message << "You hit!"
     session[:game_messages] = message
 
     if Hand.new(cards: player_cards).bust?
-      check_results()
+      check_results(blackjack_check: false)
     end
 
     redirect_to pages_home_path
@@ -137,7 +140,7 @@ class PagesController < ApplicationController
     session[:dealer_cards] = card_data(dealer_cards)
     session[:deck_cards] = card_data(deck.cards)
 
-    check_results()
+    check_results(blackjack_check: false)
 
     redirect_to pages_home_path
   end
@@ -152,23 +155,18 @@ class PagesController < ApplicationController
     card_data.map { |data| Card.new(rank: data["rank"], suit: data["suit"]) }
   end
 
-  def check_results()
+  def check_results(blackjack_check:)
     message = session[:game_messages]
 
     dealer_cards = cards_from(session[:dealer_cards])
     player_cards = cards_from(session[:player_cards])
-
-    player_balance = session[:player_balance]
-    dealer_balance = session[:dealer_balance]
 
     player_bet = session[:player_bet]
 
     win_ratio = session[:win_ratio]
       
     result = Game.new(player_hand: Hand.new(cards: player_cards), dealer_hand: Hand.new(cards: dealer_cards), 
-    player_balance: player_balance, dealer_balance: dealer_balance)
-
-
+    player_balance: session[:player_balance], dealer_balance: session[:dealer_balance], blackjack_check: blackjack_check)
 
     case result.hand
       when :player_bust
@@ -193,13 +191,19 @@ class PagesController < ApplicationController
         session[:dealer_balance] += player_bet;
         session[:game_stage] = 3
 
+      when :blackjack
+        then message << "You hit BLACKJACK, you win!"
+        session[:player_balance] += (player_bet + (player_bet * win_ratio));
+        session[:dealer_balance] -= player_bet;
+        session[:game_stage] = 3
+
       when :tie
          then message << "Same score, tie!";
          session[:player_balance] += player_bet;
          session[:game_stage] = 3
     end
 
-    case result.game(player_balance: player_balance, dealer_balance: dealer_balance)
+    case result.game(player_balance: session[:player_balance], dealer_balance: session[:dealer_balance])
       when :player_wins
         message << "Dealer has no money left, you win!";
         session[:game_stage] = 4
