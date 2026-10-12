@@ -3,7 +3,7 @@
     <div class="grid grid-cols-3 w-full">
       <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-20">
         <% @dealer_cards.each_with_index do |card, index| %>
-            <% if index == 1 and not @dealer_revealed %>
+            <% if index == 1 and @game_stage == 1%>
               <%= render "card_back" %>
             <% else %>
               <%= render "card", card: card %>
@@ -24,7 +24,7 @@
       </div> 
 
       <div class="col-start-2 text-5xl font-texturina">
-            <% if session[:game_start] == true %>
+            <% if @game_stage == 1 %>
           ~
         <% else %>
           <%= @dealer_score %>
@@ -39,7 +39,7 @@
       </div> 
 
       <div class="col-start-2 text-5xl font-texturina">
-        <% if session[:game_start] == true %>
+        <% if @game_stage == 1 %>
           ~
         <% else %>
           <%= @player_score %>
@@ -48,7 +48,7 @@
 
       <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-20">
         <% @player_cards.each_with_index do |card, index| %>
-          <% if session[:game_start] == true %>
+          <% if @game_stage == 1 %>
             <%= render "card_back" %>
           <% else %>
             <%= render "card", card: card %>
@@ -61,24 +61,24 @@
         <div class= "flex flex-col pb-13 items-center gap-5">
           <%= form_with url: pages_start_round_path, class: "flex flex-col gap-5 px-4" do |f| %>
             <%= f.label :player_bet, "Your bet:", class: "text-2xl text-white" %>
-            <%= f.number_field :player_bet, required: true, hidden: session[:game_start] == false , class: "bg-white w-40 text-center rounded-md p-2", placeholder: "$0"  %>
-            <div class=" <%= 'hidden' if session[:game_start] == true %> text-white text-4xl"> $ <%= @player_bet %> </div>
+            <%= f.number_field :player_bet, required: true, hidden: @game_stage != 1, class: "bg-white w-40 text-center rounded-md p-2", placeholder: "$0"  %>
+            <div class=" <%= 'hidden' if @game_stage == 1 %> text-white text-4xl"> $ <%= @player_bet %> </div>
             
-            <%= f.submit "Place Bet", disabled: session[:game_start] == false , class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
+            <%= f.submit "Place Bet", disabled: @game_stage != 1 , class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
               disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
 
           <% end %>
             <div class="flex flex-col col-start-1 items-center gap-10">
-              <%= button_to "New Round", pages_reset_game_path, disabled: session[:game_start] == true || session[:round_start] == true || @game_over == true, class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
+              <%= button_to "New Round", pages_reset_game_path, disabled: @game_stage != 3, class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black
                 disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
             </div>   
           
         </div>
           <div class="flex flex-col col-start-2 gap-5">
-            <%= button_to "Stand", pages_stand_path, method: :post, disabled: @player_score > 21 || @round_start == false, 
+            <%= button_to "Stand", pages_stand_path, method: :post, disabled: @game_stage != 2, 
             class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
 
-            <%= button_to "Hit", pages_hit_path, method: :post, disabled: @player_score >= 21 || @round_start == false, 
+            <%= button_to "Hit", pages_hit_path, method: :post, disabled: @game_stage != 2, 
             class: "w-40 bg-black text-white px-4 py-2 rounded-md hover:bg-white hover:text-black disabled:bg-gray-400 disabled:text-gray-700 disabled:cursor-not-allowed" %>
 
             <%= button_to "Split", pages_hit_path, method: :post, disabled: true, 
