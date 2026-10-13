@@ -25,7 +25,7 @@ class Game
   end
 
   def game(player_balance:, dealer_balance:)
-    if not @blackjack_check
+    if !@blackjack_check || @player_hand.blackjack?
       return :player_wins if dealer_balance <= 0
       return :dealer_wins if player_balance <= 0
     end

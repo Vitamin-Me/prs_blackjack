@@ -1,7 +1,9 @@
-<div class="flex flex-col items-center justify-center py-2">
-  <main class="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
+<div class="flex-1 flex flex-col items-center justify-center py-2">
+  <div class="flex flex-col items-center justify-center w-full flex-1 px-20 text-center">
     <div class="grid grid-cols-3 w-full">
-      <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-20">
+
+    <%# span 2 columns, 25% is half of one, subtracting the width of the card to keep it centered %>
+      <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-[calc(25%-216px)]">
         <% @dealer_cards.each_with_index do |card, index| %>
             <% if @game_stage == 1%>
               <%= render "card_back" %>
@@ -47,8 +49,8 @@
           <%= @player_score %>
         <% end %>
       </div>
-
-      <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-20">
+ 
+      <div class="flex col-start-1 col-span-2 gap-4 justify-end mr-[calc(25%-216px)]">
         <% @player_cards.each_with_index do |card, index| %>
           <% if @game_stage == 1 %>
             <%= render "card_back" %>
@@ -94,7 +96,7 @@
 
     </div>
 
-  </main>
+  </div>
     
 </div>
 
